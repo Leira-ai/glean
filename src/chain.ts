@@ -63,7 +63,7 @@ export const publicClient: PublicClient = createPublicClient({
   // No batch:true: the GIWA public RPC silently drops calls when a burst of
   // batched eth_calls lands at once (proven during the Slipway build).
   // Plain transport + explicit retries + a narrow queue below is reliable.
-  transport: http(RPC_URL, { timeout: 30_000, retryCount: 3, retryDelay: 600 }),
+  transport: http(RPC_URL, { timeout: 30_000, retryCount: 3, retryDelay: 800 }),
 });
 
 // ---------- retry + narrow concurrency queue ----------
@@ -104,12 +104,12 @@ const queued = makeQueue(3);
 
 /** A single contract read through the queue with retries. Throws after retries. */
 export function read<T>(params: Parameters<PublicClient['readContract']>[0]): Promise<T> {
-  return queued(() => withRetry(() => publicClient.readContract(params), 3, 350)) as Promise<T>;
+  return queued(() => withRetry(() => publicClient.readContract(params), 5, 600)) as Promise<T>;
 }
 
 /** An eth_call simulation through the queue with retries. Throws after retries. */
 export function simulate<T>(params: Parameters<PublicClient['simulateContract']>[0]): Promise<{ result: T }> {
-  return queued(() => withRetry(() => publicClient.simulateContract(params), 3, 350)) as Promise<{ result: T }>;
+  return queued(() => withRetry(() => publicClient.simulateContract(params), 5, 600)) as Promise<{ result: T }>;
 }
 
 export function getBlockNumber(): Promise<bigint> {
