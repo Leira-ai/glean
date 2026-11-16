@@ -460,6 +460,21 @@ function revertName(e: unknown): string {
 }
 const NOT_READY = /NotReady|NothingTo|NoSurplus|NoLeftover|NotYet/i;
 
+/**
+ * True when the failure is the contract itself answering with a revert (the
+ * read succeeded; the claim is simply not executable right now), as opposed
+ * to a transport/RPC failure where we genuinely learned nothing.
+ */
+function isContractRevert(e: unknown): boolean {
+  let cur: unknown = e;
+  for (let i = 0; i < 8 && cur && typeof cur === 'object'; i++) {
+    const o = cur as { name?: unknown; cause?: unknown };
+    if (o.name === 'ContractFunctionExecutionError') return true;
+    cur = o.cause;
+  }
+  return false;
+}
+
 async function curveInfo(curve: Address): Promise<CurveInfo> {
   // SDK client first; it authenticates the curve against the reviewed
   // deployment. Fall back to raw SDK-ABI reads if the client rejects it.
@@ -535,9 +550,9 @@ export async function lookup(
               claim: { kind: 'surplus', curve: l.curve },
             });
           } catch (e) {
-            // A revert naming a not-ready condition is a successful read with
-            // a locked answer, not a failed read.
-            const notReady = NOT_READY.test(revertName(e));
+            // A contract revert is a successful read with a locked answer,
+            // not a failed read.
+            const notReady = isContractRevert(e) || NOT_READY.test(revertName(e));
             if (!notReady) streamOk.surplus = false;
             rows.push({
               key: `surplus-${l.curve}`,
@@ -567,7 +582,7 @@ export async function lookup(
               claim: { kind: 'leftover', curve: l.curve },
             });
           } catch (e) {
-            const notReady = NOT_READY.test(revertName(e));
+            const notReady = isContractRevert(e) || NOT_READY.test(revertName(e));
             if (!notReady) streamOk.leftover = false;
             rows.push({
               key: `leftover-${l.curve}`,
@@ -617,15 +632,19 @@ export async function lookup(
               state: result > 0n ? 'claimable' : 'zero',
               claim: { kind: 'partner', curve: l.curve },
             });
-          } catch {
-            streamOk.partner = false;
+          } catch (e) {
+            // The factory record read fine; if the claim call itself reverts
+            // (observed live: a funded-looking fee whose claim reverts), the
+            // honest answer is "not yet claimable", not "unreadable".
+            const notReady = isContractRevert(e) || NOT_READY.test(revertName(e));
+            if (!notReady) streamOk.partner = false;
             rows.push({
               key: `partner-${l.curve}`,
               stream: 'partner',
               source: { launchToken: l.token },
               token: null,
               amount: null,
-              state: 'unavailable',
+              state: notReady ? 'notready' : 'unavailable',
               claim: { kind: 'partner', curve: l.curve },
             });
           }
