@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Glean — Ammora Claim Center on GIWA Sepolia</title>
+    <meta
+      name="description"
+      content="Glean finds every fee and earning a wallet is owed across Ammora — creator surplus, launch partner fees, ALMM referral fees, pool revenue and fee-sharing vault shares — and lets the owner claim them. GIWA Sepolia testnet, built with the official Ammora SDK."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script type="module" crossorigin src="/glean/assets/index-BcN6lBTQ.js"></script>
+    <link rel="stylesheet" crossorigin href="/glean/assets/index-BuusrcUz.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="wordmark">
+        <span class="mark" aria-hidden="true"></span>
+        <span class="name">Glean</span>
+        <span class="tag" data-i18n="tagline">Ammora claim center</span>
+      </div>
+      <div class="topbar-right">
+        <span class="netstat"><span class="dot" aria-hidden="true"></span><span id="blockTicker" data-i18n="net.connecting">GIWA Sepolia · connecting…</span></span>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button id="langEn" type="button" class="lang-btn">EN</button>
+          <button id="langId" type="button" class="lang-btn">ID</button>
+        </div>
+        <button id="connectBtn" class="btn ghost" type="button" data-i18n="wallet.connect">Connect wallet</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <h1 data-i18n="hero.title">Find your money.<br />Claim your money.</h1>
+        <p class="lede" data-i18n="hero.lede"></p>
+      </section>
+
+      <section class="lookup card">
+        <form id="lookupForm">
+          <label for="addrInput" data-i18n="lookup.label">Wallet address to inspect</label>
+          <div class="lookup-row">
+            <input id="addrInput" class="mono" type="text" spellcheck="false" autocomplete="off" data-i18n-placeholder="lookup.placeholder" placeholder="0x…" />
+            <button id="searchBtn" class="btn primary" type="submit" data-i18n="lookup.button">Find claimable funds</button>
+            <button id="useConnectedBtn" class="btn ghost hidden" type="button" data-i18n="lookup.useConnected">Use my connected wallet</button>
+          </div>
+          <p id="lookupMsg" class="lookup-msg" role="alert"></p>
+          <p class="hint" data-i18n="lookup.hint">Read-only: looking up an address never moves funds and needs no wallet.</p>
+        </form>
+        <div id="progress" class="progress hidden">
+          <p id="phaseLine" class="mono"></p>
+          <div class="bar"><div id="barFill"></div></div>
+          <p class="hint" data-i18n="scanning.note">First sweep scans the chain from the deployment block; later sweeps resume from cache.</p>
+        </div>
+      </section>
+
+      <section id="summary" class="summary card hidden">
+        <h2 data-i18n="summary.title">Total claimable</h2>
+        <div id="totalsList" class="totals"></div>
+        <p class="hint" data-i18n="summary.note">Totals add up only amounts the contracts confirmed as claimable in this sweep.</p>
+        <p id="claimGate" class="lookup-msg"></p>
+        <div id="claimAllRow" class="claim-all hidden">
+          <button id="claimAllBtn" class="btn primary" type="button" data-i18n="claim.all">Claim all</button>
+          <span class="hint" data-i18n="claim.allNote">One wallet confirmation per item.</span>
+        </div>
+      </section>
+
+      <section id="results" class="hidden">
+        <h2 id="resultsFor"></h2>
+        <div id="streamCards"></div>
+        <div id="emptyState" class="card hidden">
+          <h3 data-i18n="empty.title">No claimable funds found</h3>
+          <p data-i18n="empty.body"></p>
+        </div>
+      </section>
+
+      <section class="how card">
+        <h2 data-i18n="how.title">Where the money comes from</h2>
+        <p data-i18n="how.body"></p>
+      </section>
+    </main>
+
+    <footer>
+      <p data-i18n="footer.note"></p>
+    </footer>
+
+  </body>
+</html>
